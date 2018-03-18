@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <!--      JavaScript 6th Edition, Vodnik, Gosselin.
+      Chapter 3
+      Hands-on Project 3-1
+
+      Author: Jorge Martinez :P
+      Date:   3/16/18
+
+      Filename: index.htm
+        * Add a new lunch item of you liking and assign it any price you like and have it included in the calculation.
+        * Change the existing "total: line to read "subtotal". This will be the subtotal and you will add a new total at the bottom.
+        * Add a new line item under the subtotal and call it "Sales Tax". Calculate the sales tax based on the total. use 9.25% as the tax rate and display it.
+        * Add a new line item and call it "Order Total" which displays Sub Total + Sales Tax.
+   -->
+   <meta charset="utf-8" />
+   <meta name="viewport" content="width=device-width,initial-scale=1.0">
+   <title>Hands-on Project 3-1</title>
+   <link rel="stylesheet" href="styles.css" />
+   <script src="modernizr.custom.05819.js"></script>
+</head>
+
+<body>
+   <header>
+      <h1>
+         Hands-on Project 3-1
+      </h1>
+   </header>
+
+   <article>
+      <h2>Lunch selections</h2>
+      <form>
+         <input type="checkbox" id="item1" value="8" />
+         <label for="item1">Fried chicken ($8.00)</label>
+         <input type="checkbox" id="item2" value="10" />
+         <label for="item2">Fried halibut ($10.00)</label>
+         <input type="checkbox" id="item3" value="8" />
+         <label for="item3">Hamburger ($8.00)</label>
+         <input type="checkbox" id="item4" value="13" />
+         <label for="item4">Grilled salmon ($13.00)</label>
+         <input type="checkbox" id="item5" value="6" />
+         <label for="item5">Side salad ($6.00)</label>
+         <input type="checkbox" id="item6" value="6" />
+         <label for="item6">Club Sandwich($6.00)</label>
+         <input type="checkbox" id="item7" value="3"/>
+         <label for"item7">Soda ($3.00)</label>
+         <input type="button" value="Submit" id="sButton" />
+      </form>
+      <div>
+         <p id="subTotal"></p>
+         <p id="salesTax"></p>
+         <p id="total"></p>
+      </div>
+   </article>
+<script>
+
+    String.prototype.replaceAt=function(index,replacement){
+        return this.substring(0,index) + replacement + this.substring(index + replacement.length);
+    }
+
+    function calcTotal(){
+        var itemTotal = 0;
+        var subTotal = 0;
+        var salesTax = 0.0925;
+        var items = document.getElementsByTagName("input");
+
+        // this adds up the subtotal
+        for (var i = 0; i < items.length; i++){
+            if(items[i].checked){
+                subTotal += (items[i].value * 1)
+            }
+        }
+        subTotal *= 100;
+        itemTotal = (subTotal + (subTotal*salesTax))/100
+        subTotal /= 100;
+
+        // converting itemTotal to a string
+        var stringNum = itemTotal.toString();
+
+        // going through string to find decimal point
+        for (i=0; i<stringNum.length; i++){
+            // using decimal point as our reference point
+            if(stringNum[i] === "."){
+                // checks if third decimal place is greater than five
+                if(parseInt(stringNum[i+3]) > 4){
+                    //checks if second decimal place is a nine
+                    if(parseInt(stringNum[i+2] === 9)){
+                        // checks if the 1st decimal place is also a nine
+                        // if its a nine then we have to add one to the first digit place
+                        if(parseInt(stringNum[i+1]) === 9){
+                            // if the first digit place is a nine then we have add one to second digit place
+                            if(parseInt(stringNum[i-1])===9){
+                                // get the second digit
+                                var secondDigit = parseInt(stringNum[i-2]);
+                                // add one to it
+                                secondDigit+=1;
+                                // replace second digit
+                                stringNum = stringNum.replaceAt(i-2,secondDigit.toString());
+                                // round first digit
+                                stringNum = stringNum.replaceAt(i-1,"0");
+                                // round first decimal
+                                stringNum = stringNum.replaceAt(i+1,"0");
+                                // round second decimal
+                                stringNum = stringNum.replaceAt(i+2,"0");
+                            }else{
+                                // we get the first digit
+                                var firstDigit = parseInt(stringNum[i-1]);
+                                // we add one to it
+                                firstDigit+=1;
+                                // now we have to round all the values up
+                                stringNum = stringNum.replaceAt(i-1,firstDigit.toString());
+                                stringNum = stringNum.replaceAt(i+1,"0");
+                                stringNum = stringNum.replaceAt(i+2,"0");
+                            }
+                        }else{ // other wise we just add one to the first place
+                        // convert the first decimal place into an integer 
+                        var firstPlace = parseInt(stringNum[i+1]);
+                        // add one to it
+                        firstPlace+=1;
+                        // create a new string with first decimal place edited
+                        stringNum = stringNum.replaceAt(i+1,firstPlace.toString());
+                        // now we create a new string with a zero on in the second decimal place
+                        stringNum = stringNum.replaceAt(i+2,"0");
+                        }
+                    }else {// if the second decimal place is not a nine then we can just add one the second place  
+                        // we convert the second decimal place into an integer
+                        var secondPlace = parseInt(stringNum[i+2]);
+                        // add one to it
+                        secondPlace+=1;
+                        // we have to create a new string with the decimal place replaced
+                        stringNum = stringNum.replaceAt(i+2, secondPlace.toString());
+                        // cut off everything after the penny!
+                        stringNum = stringNum.substring(0,i+3);
+                    }
+                    // we'll get the first number after the
+                // if its an undefined zero
+                }else if (stringNum[i+2] === undefined){
+                    stringNum = stringNum.replaceAt(i+2,"0");
+                } else { // if its 0
+                    stringNum = stringNum.substring(0,i+3);
+                }
+                break;
+            }
+        }
+        itemTotal = stringNum;
+        
+        document.getElementById("subTotal").innerHTML = "Subtotal: $" + subTotal + ".00";
+        document.getElementById("salesTax").innerHTML = "Sales Tax: 9.25%";
+        document.getElementById("total").innerHTML = "Total: $" + itemTotal;
+    }
+
+    // add backward compatible event listener to Submit button
+    var submitButton = document.getElementById("sButton");
+    if(submitButton.addEventListener) {
+        submitButton.addEventListener("click", calcTotal, false);
+    } else if (submitButton.attachEvent){
+        submitButton.attachEvent("onclick", calcTotal);
+    }
+</script>
+</body>
+</html>
